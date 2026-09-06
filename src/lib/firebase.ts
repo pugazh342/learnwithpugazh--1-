@@ -89,7 +89,6 @@ export async function testFirestoreConnection(): Promise<boolean> {
       console.warn('Firebase client is offline or initializing.');
       return false;
     }
-    // Permission denied or not found is acceptable for a test doc
     return true;
   }
 }
