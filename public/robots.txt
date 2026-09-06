@@ -1,0 +1,35 @@
+# LearnWithPugazh Production Robots Directives
+# https://learnwithpugazh.dev
+
+User-agent: *
+Allow: /
+Allow: /learn/
+Allow: /roadmaps/
+Allow: /labs/
+Allow: /projects/
+Allow: /about
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api/
+
+# Social Media & Crawlers
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+# Canonical Sitemap Location
+Sitemap: https://learnwithpugazh.dev/sitemap.xml

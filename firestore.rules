@@ -1,0 +1,174 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSuperAdminEmail() {
+      return isSignedIn() &&
+        request.auth.token.email.lower() == 'kpugazhmani21@gmail.com' &&
+        request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isSuperAdminEmail();
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidUser(data) {
+      let allowedKeys = [
+        'userId', 'email', 'displayName', 'photoURL',
+        'savedProjects', 'savedRoadmaps', 'createdAt', 'updatedAt'
+      ];
+      let actualKeys = data.keys();
+      let extraKeys = actualKeys.removeAll(allowedKeys);
+      return extraKeys.size() == 0 &&
+        data.userId is string && data.userId.size() <= 128 &&
+        data.email is string && data.email.size() <= 150 &&
+        (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 150)) &&
+        (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 500)) &&
+        (!('savedProjects' in data) || (
+          data.savedProjects is list && data.savedProjects.size() <= 100 &&
+          data.savedProjects.filter(i => !(i is string && i.size() > 0 && i.size() <= 128)).size() == 0
+        )) &&
+        (!('savedRoadmaps' in data) || (
+          data.savedRoadmaps is list && data.savedRoadmaps.size() <= 100 &&
+          data.savedRoadmaps.filter(i => !(i is string && i.size() > 0 && i.size() <= 128)).size() == 0
+        ));
+    }
+
+    function isValidProject(data) {
+      let allowedKeys = [
+        'title', 'slug', 'category', 'description', 'problem',
+        'technologies', 'featured', 'createdAt', 'updatedAt'
+      ];
+      let actualKeys = data.keys();
+      let extraKeys = actualKeys.removeAll(allowedKeys);
+      return extraKeys.size() == 0 &&
+        data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+        data.slug is string && data.slug.size() > 0 && data.slug.size() <= 128 &&
+        (!('category' in data) || (data.category is string && data.category.size() <= 100)) &&
+        (!('description' in data) || (data.description is string && data.description.size() <= 10000)) &&
+        (!('problem' in data) || (data.problem is string && data.problem.size() <= 10000)) &&
+        (!('technologies' in data) || (
+          data.technologies is list && data.technologies.size() <= 50 &&
+          data.technologies.filter(i => !(i is string && i.size() > 0 && i.size() <= 100)).size() == 0
+        )) &&
+        (!('featured' in data) || (data.featured is bool));
+    }
+
+    function isValidRoadmap(data) {
+      let allowedKeys = [
+        'title', 'slug', 'description', 'difficulty',
+        'estimatedDuration', 'stages', 'createdAt', 'updatedAt'
+      ];
+      let actualKeys = data.keys();
+      let extraKeys = actualKeys.removeAll(allowedKeys);
+      return extraKeys.size() == 0 &&
+        data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+        data.slug is string && data.slug.size() > 0 && data.slug.size() <= 128 &&
+        (!('description' in data) || (data.description is string && data.description.size() <= 10000)) &&
+        (!('difficulty' in data) || (data.difficulty is string && data.difficulty.size() <= 50)) &&
+        (!('estimatedDuration' in data) || (data.estimatedDuration is string && data.estimatedDuration.size() <= 50)) &&
+        (!('stages' in data) || (
+          data.stages is list && data.stages.size() <= 30 &&
+          data.stages.filter(s => !(s is map && s.title is string && s.title.size() > 0 && s.title.size() <= 200)).size() == 0
+        ));
+    }
+
+    function isValidLab(data) {
+      let allowedKeys = [
+        'id', 'labNumber', 'title', 'slug', 'category', 'categorySlug',
+        'difficulty', 'estimatedTime', 'tools', 'prerequisites', 'objectives',
+        'topologyDescription', 'devices', 'conceptExplanation', 'setupInstructions',
+        'steps', 'validation', 'troubleshooting', 'challenge', 'whatYouLearned',
+        'nextLab', 'relatedTopics', 'relatedProjects', 'instagramPost',
+        'createdAt', 'updatedAt'
+      ];
+      let actualKeys = data.keys();
+      let extraKeys = actualKeys.removeAll(allowedKeys);
+      return extraKeys.size() == 0 &&
+        data.id is string && data.id.size() > 0 && data.id.size() <= 128 &&
+        data.labNumber is string && data.labNumber.size() > 0 && data.labNumber.size() <= 20 &&
+        data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+        data.slug is string && data.slug.size() > 0 && data.slug.size() <= 128 &&
+        data.category is string && data.category.size() > 0 && data.category.size() <= 100 &&
+        data.categorySlug is string && data.categorySlug.size() > 0 && data.categorySlug.size() <= 100 &&
+        data.difficulty is string &&
+        (data.difficulty == 'Beginner' || data.difficulty == 'Intermediate' || data.difficulty == 'Advanced') &&
+        data.estimatedTime is string && data.estimatedTime.size() > 0 && data.estimatedTime.size() <= 50 &&
+        data.tools is list && data.tools.size() <= 30 &&
+        data.prerequisites is list && data.prerequisites.size() <= 30 &&
+        data.objectives is list && data.objectives.size() <= 30 &&
+        data.topologyDescription is string && data.topologyDescription.size() > 0 && data.topologyDescription.size() <= 10000 &&
+        data.conceptExplanation is string && data.conceptExplanation.size() > 0 && data.conceptExplanation.size() <= 10000 &&
+        (!('setupInstructions' in data) || (data.setupInstructions is list && data.setupInstructions.size() <= 50)) &&
+        data.steps is list && data.steps.size() <= 100 &&
+        data.validation is list && data.validation.size() <= 30 &&
+        (!('troubleshooting' in data) || (data.troubleshooting is list && data.troubleshooting.size() <= 50)) &&
+        (!('whatYouLearned' in data) || (data.whatYouLearned is list && data.whatYouLearned.size() <= 30));
+    }
+
+    // Projects Collection (Public read, Admin manage)
+    match /projects/{projectId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidId(projectId) && isValidProject(incoming());
+      allow update: if isAdmin() && isValidId(projectId) && isValidProject(incoming());
+      allow delete: if isAdmin() && isValidId(projectId);
+    }
+
+    // Roadmaps Collection (Public read, Admin manage)
+    match /roadmaps/{roadmapId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidId(roadmapId) && isValidRoadmap(incoming());
+      allow update: if isAdmin() && isValidId(roadmapId) && isValidRoadmap(incoming());
+      allow delete: if isAdmin() && isValidId(roadmapId);
+    }
+
+    // Labs Collection (Public read, Admin manage)
+    match /labs/{labId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidId(labId) && isValidLab(incoming());
+      allow update: if isAdmin() && isValidId(labId) && isValidLab(incoming());
+      allow delete: if isAdmin() && isValidId(labId);
+    }
+
+    // User Private Profile & Activity
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isValidId(userId) && isOwner(userId) && isValidUser(incoming());
+      allow update: if isValidId(userId) && (isOwner(userId) || isAdmin()) && isValidUser(incoming());
+      allow delete: if isValidId(userId) && (isOwner(userId) || isAdmin());
+    }
+
+    // Admin Access Control Registry
+    match /admins/{adminId} {
+      allow read: if isValidId(adminId) && (isOwner(adminId) || isAdmin());
+      allow write: if isSuperAdminEmail();
+    }
+  }
+}

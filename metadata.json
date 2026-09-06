@@ -1,0 +1,6 @@
+{
+  "name": "LearnWithPugazh",
+  "description": "Learn. Build. Share. A modern technical learning platform and developer portfolio covering Networking, Web Development, and Linux.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
