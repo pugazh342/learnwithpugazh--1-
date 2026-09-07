@@ -9,7 +9,7 @@ import { roadmaps } from '../src/data/roadmaps.ts';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const BASE_URL = 'https://learnwithpugazh.dev';
+const BASE_URL = process.env.SITE_URL || 'https://learnwithpugazh.dev';
 const SITEMAP_PATH = path.resolve(__dirname, '../public/sitemap.xml');
 
 interface SitemapUrl {

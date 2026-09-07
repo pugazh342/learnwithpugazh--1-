@@ -8,6 +8,7 @@ import {
   signOut,
 } from 'firebase/auth';
 import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
+import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -19,6 +20,12 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
+// App Check — protects API key from unauthorized use
+const appCheckToken = import.meta.env.VITE_FIREBASE_APP_CHECK_TOKEN;
+if (appCheckToken) {
+  initializeAppCheck(app, { provider: new ReCaptchaV3Provider(appCheckToken) });
+}
 
 export const db = getFirestore(app);
 export const auth = getAuth(app);
