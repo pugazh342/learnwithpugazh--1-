@@ -95,11 +95,11 @@ function parseAuthError(error: unknown): AuthErrorDetails {
         message: 'Network connection error while communicating with Firebase.',
         actionHint: 'Please verify your internet connection and DNS settings.',
       };
-    case 'auth/internal-error':
+case 'auth/internal-error':
       return {
         code: errCode,
         message: 'Firebase internal authentication error.',
-        actionHint: 'Please check your API key and OAuth Client ID in firebase-applet-config.json.',
+        actionHint: 'Please check your Firebase credentials in your environment variables (VITE_FIREBASE_API_KEY, VITE_FIREBASE_PROJECT_ID, etc.) or in your Vite build configuration.',
       };
     default:
       return {
